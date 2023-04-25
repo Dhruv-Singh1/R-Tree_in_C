@@ -3,6 +3,9 @@
 #include<stdbool.h>
 #include<limits.h>
 // Constant definitions
+typedef struct node node;
+typedef struct key key;
+
 #define M 4
 #define m 2
 #define MIN(a,b) ((a) <= (b) ? (a) : (b))
@@ -15,17 +18,23 @@ typedef struct  {
     int y2;
 } dimensions;
 
-typedef struct {
+
+
+struct key {
     dimensions dim;
     node * child;
-} key;
+};
 
-typedef struct {
+struct node {
   dimensions MCR;
   key **keys;
   int numKeys;
   bool isLeaf;
-} node;
+};
+
+
+
+
 
 typedef struct  {
     node * root;
@@ -78,21 +87,25 @@ node *ChooseLeaf(node* root,dimensions child){
 }
 
 
+int updateMCR(){
 
-void insertkey(node *node,dimensions dims){
-   if(node->numKeys<M)
+}
+
+void insertkey(node * Node,dimensions dims){
+   if(Node->numKeys<M)
    {
-    key *k=node->keys[node->numKeys++];
+    key *k=Node->keys[Node->numKeys++];
     k->dim=dims;
-    updateMCR(node *node,dimensions dims);
+    updateMCR(Node,dims);
    }
    else{
     
    }
-   int index=(node->numKeys)++;
-   node->keys[index]->dim=dims;
-   node->keys[index]->child=NULL;
+   int index=(Node->numKeys)++;
+   Node->keys[index]->dim=dims;
+   Node->keys[index]->child=NULL;
 }
+
 
 void insertnode(rTree * tree,dimensions dims){
     if(tree->root==NULL){
@@ -118,12 +131,14 @@ void quadraticSplit(node * Node){
     newNode1->keys[0] = seeds[1];
     keysLeft-=2;
     while(keysLeft>0){
-        int * keyAndGroup = pickNext(Node);
+        int * keyAndGroup = pickNext(Node,newNode0,newNode1);
         if(keyAndGroup[0]==0){ 
             newNode0->keys[keyAndGroup[1]]=Node->keys[keyAndGroup[1]];
         }else{
             newNode1->keys[keyAndGroup[1]]=Node->keys[keyAndGroup[1]];   
         }  
+        //set key in orignal node to null so it's removed in next iteration
+        Node->keys[keyAndGroup[1]]=NULL;
     }
 }
 
@@ -144,7 +159,8 @@ key ** pickSeeds(node * node){
                 MAX(node->keys[i]->dim.y2, node->keys[j]->dim.y2)
             };
 
-            int wasteArea = (max.x2-max.x1)*(max.y2-max.y1);
+            int wasteArea = (max.x2-max.x1)*(max.y2-max.y1) - 
+            (node->keys[i]->dim.x2-node->keys[i]->dim.x1)*(node->keys[i]->dim.y2-node->keys[i]->dim.y1);
             if (wasteArea>wasteAreaMax){
                 wasteAreaMax = wasteArea;
                 seeds[0]=node->keys[i];
@@ -157,8 +173,66 @@ key ** pickSeeds(node * node){
 
 
 //Pick Next
-key * pickNext(node * node){
-    
+int * pickNext(node * Node,node * newNode0,node * newNode1){
+    int wasteAreaMax = 0;
+    int * returnArray=(int )malloc(sizeof(int )*2);
+
+    for(int i=0; i<Node->numKeys; i++){
+        for(int j=i; j<Node->numKeys; j++){
+            // if the node is NULL in orign..
+            if(Node->keys[i]==NULL || Node->keys[j]==NULL) continue;
+
+            dimensions max0 = {
+                MAX(newNode0->MCR.x1, Node->keys[i]->dim.x1), 
+                MAX(newNode0->MCR.x2, Node->keys[i]->dim.x2),
+                MAX(newNode0->MCR.y1, Node->keys[i]->dim.y1),
+                MAX(newNode0->MCR.y2, Node->keys[i]->dim.y2)
+            };
+
+            int wasteArea1 = (max0.x2-max0.x1)*(max0.y2-max0.y1)- 
+            (newNode0->keys[i]->dim.x2-newNode0->MCR.x1)*(newNode0->MCR.y2-newNode0->MCR.y1);
+
+            dimensions max1 = {
+                MAX(newNode1->MCR.x1, Node->keys[i]->dim.x1), 
+                MAX(newNode1->MCR.x2, Node->keys[i]->dim.x2),
+                MAX(newNode1->MCR.y1, Node->keys[i]->dim.y1),
+                MAX(newNode1->MCR.y2, Node->keys[i]->dim.y2)
+            };
+
+            int wasteArea2 = (max1.x2-max1.x1)*(max1.y2-max1.y1)- 
+            (newNode1->MCR.x2-newNode1->MCR.x1)*(newNode1->MCR.y2-newNode1->MCR.y1);
+
+            if (abs(wasteArea2-wasteArea1)>wasteAreaMax){
+                wasteAreaMax=abs(wasteArea2-wasteArea1);
+                if(wasteArea2-wasteArea1<=0){
+
+                    returnArray[0]=0;
+                }
+                else{
+                    returnArray[0]=1;
+                }
+                returnArray[1]=i;
+            }
+        }
+    }
+    return returnArray;
+
+}
+
+int main(){
+    rTree * rtree= createTree();
+    dimensions dim1 = {1,3,4,8};
+    dimensions dim2 = {1,3,4,8};
+    dimensions dim3 = {1,3,4,8};
+    dimensions dim4 = {1,3,4,8};
+    dimensions dim5 = {1,3,4,8};
+    insertkey(rtree,dim1);
+    insertkey(rtree,dim2);
+    insertkey(rtree,dim3);
+    insertkey(rtree,dim4);
+    insertkey(rtree,dim5);
+
+    return 0;
 }
 
 //Choose Leaf
