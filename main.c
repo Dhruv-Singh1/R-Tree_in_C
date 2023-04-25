@@ -2,9 +2,16 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<limits.h>
+#include <stdbool.h>
 // Constant definitions
+
+
 typedef struct node node;
 typedef struct key key;
+
+//move them to header files
+int * pickNext(node * Node,node * newNode0,node * newNode1);
+key ** pickSeeds(node * node);
 
 #define M 4
 #define m 2
@@ -17,8 +24,6 @@ typedef struct  {
     int y1;
     int y2;
 } dimensions;
-
-
 
 struct key {
     dimensions dim;
@@ -33,13 +38,11 @@ struct node {
 };
 
 
-
-
-
 typedef struct  {
     node * root;
     int height;
 } rTree ;
+
 
 // new node is assumed to be a leaf
 node * createNode(dimensions MCR){
@@ -47,9 +50,12 @@ node * createNode(dimensions MCR){
     n->MCR=MCR;
     n->numKeys=0;
     n->keys=(key **)malloc(sizeof(key *)*M);
+    n->isLeaf=true;
+
     for(int i=0; i<M; i++){
         n->keys[i] = (key *)malloc(sizeof(key));
     }
+
     return n;
 }
 
@@ -59,9 +65,11 @@ rTree * createTree() {
     rtree->root=NULL;
     return rtree;
 }
+
 int area(dimensions dim){
     return ((dim.x2-dim.x1)*(dim.y2-dim.y1));
 }
+
 int incresedArea(dimensions parent,dimensions child){
    int x1=MIN(parent.x1,child.x1);
    int x2=MAX(parent.x2,child.x2);
@@ -88,22 +96,26 @@ node *ChooseLeaf(node* root,dimensions child){
 
 
 int updateMCR(){
-
+ return 0;
 }
 
-void insertkey(node * Node,dimensions dims){
-   if(Node->numKeys<M)
-   {
-    key *k=Node->keys[Node->numKeys++];
-    k->dim=dims;
-    updateMCR(Node,dims);
-   }
-   else{
-    
-   }
-   int index=(Node->numKeys)++;
-   Node->keys[index]->dim=dims;
-   Node->keys[index]->child=NULL;
+void insertkey(rTree * root,dimensions dims){
+    node * Node=ChooseLeaf(root->root,dims);
+    Node->keys[1]->dim=dims;
+    // printf("index %d ",Node->numKeys);
+    if(Node->numKeys<M)
+    {
+        int index=Node->numKeys++;
+        printf(" index %d \n",index);
+        Node->keys[index]->dim=dims;
+        Node->keys[index]->child=NULL;
+        //updateMCR(Node,dims);
+    }
+    else{
+
+    }
+     
+     
 }
 
 
@@ -121,7 +133,7 @@ void insertnode(rTree * tree,dimensions dims){
 
 //Quadratic cost algorithm
 void quadraticSplit(node * Node){
-    int keysLeft= Node->isLeaf +1;
+    int keysLeft= M +1;
     key ** seeds = (key **)malloc(sizeof(key *)*2);
     seeds = pickSeeds(Node);
     node * newNode0 = createNode((dimensions){seeds[0]->dim.x1, seeds[0]->dim.x2, seeds[0]->dim.y1, seeds[0]->dim.y2});
@@ -175,7 +187,7 @@ key ** pickSeeds(node * node){
 //Pick Next
 int * pickNext(node * Node,node * newNode0,node * newNode1){
     int wasteAreaMax = 0;
-    int * returnArray=(int )malloc(sizeof(int )*2);
+    int * returnArray= (int * )malloc(sizeof(int )*2);
 
     for(int i=0; i<Node->numKeys; i++){
         for(int j=i; j<Node->numKeys; j++){
@@ -221,16 +233,18 @@ int * pickNext(node * Node,node * newNode0,node * newNode1){
 
 int main(){
     rTree * rtree= createTree();
+    
     dimensions dim1 = {1,3,4,8};
     dimensions dim2 = {1,3,4,8};
     dimensions dim3 = {1,3,4,8};
     dimensions dim4 = {1,3,4,8};
     dimensions dim5 = {1,3,4,8};
+    rtree->root=createNode(dim1);
     insertkey(rtree,dim1);
     insertkey(rtree,dim2);
     insertkey(rtree,dim3);
-    insertkey(rtree,dim4);
-    insertkey(rtree,dim5);
+    // insertkey(rtree,dim4);
+    // insertkey(rtree,dim5);
 
     return 0;
 }
@@ -240,12 +254,4 @@ int main(){
 //Adjust Tree
 //Minimum Bounded Rectangles
 // Node Split
-
-
-
-		
-
-		
-
-
 // Search ?
