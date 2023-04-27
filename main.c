@@ -13,6 +13,22 @@ typedef struct key key;
 int * pickNext(node * Node,node * newNode0,node * newNode1);
 key ** pickSeeds(node * node);
 
+//macro to handle 2D points
+#define dimInit(...) FUNC(__VA_ARGS__,-1,-1)
+#define FUNC(x1,y1,x2,y2, ...) dimInit(x1, y1,x2,y2)
+
+dimensions (dimInit)(int x1,int y1,int x2,int y2)
+{
+    dimensions dim;
+    if(x2==-1&&y2==-1)
+    {x2=x1;y2=y1;}
+    dim.x1=x1;
+    dim.y1=y1;
+    dim.x2=x2;
+    dim.y2=y2;
+    return dim;
+}
+
 #define M 4
 #define m 2
 #define MIN(a,b) ((a) <= (b) ? (a) : (b))
@@ -35,6 +51,7 @@ struct node {
   key **keys;
   int numKeys;
   bool isLeaf;
+  node *parent;
 };
 
 
@@ -45,7 +62,7 @@ typedef struct  {
 
 
 // new node is assumed to be a leaf
-node * createNode(dimensions MCR){
+node * createNode(dimensions MCR,node *parent){
     node * n=(node*)malloc(sizeof(node));
     n->MCR=MCR;
     n->numKeys=0;
@@ -55,7 +72,7 @@ node * createNode(dimensions MCR){
     for(int i=0; i<M; i++){
         n->keys[i] = (key *)malloc(sizeof(key));
     }
-
+    n->parent=parent;
     return n;
 }
 
@@ -95,8 +112,15 @@ node *ChooseLeaf(node* root,dimensions child){
 }
 
 
-int updateMCR(){
- return 0;
+void updateMCR(node *node,dimensions dims){
+ node->MCR.x1=MIN(node->MCR.x1,dims.x1);
+  node->MCR.x1=MAX(node->MCR.x2,dims.x2);
+ node->MCR.x1=MIN(node->MCR.y1,dims.y1);
+ node->MCR.x1=MAX(node->MCR.y2,dims.y2);
+ if(node->parent==NULL)
+ return;
+ else
+ updateMCR(node->parent,dims);
 }
 
 void insertkey(rTree * root,dimensions dims){
@@ -109,10 +133,10 @@ void insertkey(rTree * root,dimensions dims){
         printf(" index %d \n",index);
         Node->keys[index]->dim=dims;
         Node->keys[index]->child=NULL;
-        //updateMCR(Node,dims);
+        updateMCR(Node,dims);
     }
     else{
-
+       
     }
      
      
@@ -231,18 +255,23 @@ int * pickNext(node * Node,node * newNode0,node * newNode1){
 
 }
 
-int main(){
+
+
+
+
+int main(int argc, char **argv){
     rTree * rtree= createTree();
     
-    dimensions dim1 = {1,3,4,8};
-    dimensions dim2 = {1,3,4,8};
-    dimensions dim3 = {1,3,4,8};
-    dimensions dim4 = {1,3,4,8};
-    dimensions dim5 = {1,3,4,8};
-    rtree->root=createNode(dim1);
-    insertkey(rtree,dim1);
-    insertkey(rtree,dim2);
-    insertkey(rtree,dim3);
+ 
+    // dimensions dim2 = {1,3,4,8};
+    // dimensions dim3 = {1,3,4,8};
+    // dimensions dim4 = {1,3,4,8};
+    // dimensions dim5 = {1,3,4,8};
+    // dimensions dim1=dimInit(1,3,4,8);
+    // rtree->root=createNode(dim1);
+    // insertkey(rtree,dim1);
+    // insertkey(rtree,dim2);
+    // insertkey(rtree,dim3);
     // insertkey(rtree,dim4);
     // insertkey(rtree,dim5);
 

@@ -1,1 +1,1 @@
-gcc -o btree main.c && ./btree
+gcc -o btree rtree.c && ./btree
