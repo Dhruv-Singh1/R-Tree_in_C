@@ -42,9 +42,9 @@ int area(rectangle rect);
 int incresedArea(rectangle parent, rectangle child);
 node *ChooseLeaf(node *root, rectangle child);
 void quadraticSplit(node *Node,key * newkey);
-key **pickSeeds(node *node,key ** keys);
+int *pickSeeds(node *node,key ** keys);
 int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys);
 
 void createKey(node *node, rectangle rect);
 void insertkey(rTree *root, rectangle rect);
-void updateMBR(node *node, rectangle rect);
+void updateMBR(node *node);

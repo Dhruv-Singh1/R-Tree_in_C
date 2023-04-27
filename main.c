@@ -173,6 +173,7 @@ void quadraticSplit(node * Node){
         }else{
             newNode1->keys[keyAndGroup[1]]=Node->keys[keyAndGroup[1]];   
         }  
+        
         //set key in orignal node to null so it's removed in next iteration
         Node->keys[keyAndGroup[1]]=NULL;
     }
@@ -252,17 +253,11 @@ int * pickNext(node * Node,node * newNode0,node * newNode1){
         }
     }
     return returnArray;
-
 }
-
-
-
 
 
 int main(int argc, char **argv){
     rTree * rtree= createTree();
-    
- 
     // dimensions dim2 = {1,3,4,8};
     // dimensions dim3 = {1,3,4,8};
     // dimensions dim4 = {1,3,4,8};

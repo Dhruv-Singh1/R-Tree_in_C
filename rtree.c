@@ -11,6 +11,28 @@
 #define dimInit(...) FUNC(__VA_ARGS__, -1, -1)
 #define FUNC(x1, y1, x2, y2, ...) dimInit(x1, y1, x2, y2)
 
+//clone key
+key * cloneKey(key * oldkey){
+    key * newkey = (key *)malloc(sizeof(key));
+    newkey->child=oldkey->child;
+    newkey->rect=oldkey->rect;
+    return newkey;
+}
+
+// Pick Seeds
+void print(key **keys){
+     for(int i=0;i<M;i++){
+        int x1,y1,x2,y2;
+        if(keys[i]==NULL) break;
+        x1=keys[i]->rect.x1;
+        y1=keys[i]->rect.y1,
+        x2=keys[i]->rect.x2,
+        y2=keys[i]->rect.y2;
+        printf(" %d %d %d %d \n",x1,y1,x2,y2);
+    }
+printf("\n\n");
+}
+
 node *createNode(node *parent)
 {
     node *n = (node *)malloc(sizeof(node));
@@ -39,16 +61,21 @@ void preOrderTraversal(node *root)
     if (root == NULL)
         return;
     if (root->isLeaf == true)
-    {
+    {   
+        // print(root->keys);
         printf("External (Leaf Node)\n");
         for (int i = 0; i < root->numKeys; i++)
         {
+            
             printf(" Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n", root->keys[i]->rect.x1, root->keys[i]->rect.y1, root->keys[i]->rect.x2, root->keys[i]->rect.y2);
         }
     }
 
+    // print(root->keys);
+
     for (int i = 0; i < root->numKeys; i++)
     {
+
         preOrderTraversal(root->keys[i]->child);
     }
     if (root->isLeaf == true)
@@ -67,7 +94,7 @@ int incresedArea(rectangle parent, rectangle child)
     int x1 = MIN(parent.x1, child.x1);
     int x2 = MAX(parent.x2, child.x2);
     int y1 = MIN(parent.y1, child.y1);
-    int y2 = MIN(parent.y2, child.y2);
+    int y2 = MAX(parent.y2, child.y2);
     return (area((rectangle){x1, x2, y1, y2}) - area(parent));
 }
 
@@ -100,63 +127,120 @@ void quadraticSplit(node *Node,key * newkey)
     keys[0]=newkey;
     for(int i=1;i<keysLeft;i++){
         keys[i]= Node->keys[i-1];
-
     }
-
-    key **seeds = pickSeeds(Node,keys);
-
+    // print(keys);
+    // printf("\n\n");
+    int *seeds = pickSeeds(Node,keys);
+    int c = seeds[0];
+    int d = seeds[1];
     node *newNode0 = createNode(Node);
-    createKey(newNode0, seeds[0]->rect);
+    createKey(newNode0, keys[seeds[0]]->rect);
     node *newNode1 = createNode(Node);
-    createKey(newNode1, seeds[1]->rect);
+    createKey(newNode1, keys[seeds[1]]->rect);
+
+    keys[seeds[0]] = NULL;
+    keys[seeds[1]] = NULL;
 
     // newNode0->keys[0] = seeds[0];
     // newNode1->keys[0] = seeds[1];
+    newNode0->MBR =newNode0->keys[0]->rect;
+    newNode1->MBR =newNode1->keys[0]->rect;
+    
     keysLeft -= 2;
+    int i,j;
+    i=j=1;
     while (keysLeft > 0)
-    {
+    { 
+        //    if(i== 3|| j==3)
+    //     {
+    //         printf("overflow ");
+    //     }
+
         int *keyAndGroup = pickNext(Node, newNode0, newNode1, keys);
-        if (keyAndGroup[0] == 0)
+        int a = keyAndGroup[0];
+        int b = keyAndGroup[1];
+        if (keyAndGroup[0] == 0 && keysLeft>(m-newNode1->numKeys) )
         {
-            newNode0->keys[keyAndGroup[1]] = keys[keyAndGroup[1]];
+            newNode0->keys[i] = cloneKey(keys[keyAndGroup[1]]);
+            //update MBR of both nodes after each iteration
+            rectangle newMBR0 = {
+                    MIN(newNode0->MBR.x1, keys[keyAndGroup[1]]->rect.x1),
+                    MAX(newNode0->MBR.x2, keys[keyAndGroup[1]]->rect.x2),
+                    MIN(newNode0->MBR.y1, keys[keyAndGroup[1]]->rect.y1),
+                    MAX(newNode0->MBR.y2, keys[keyAndGroup[1]]->rect.y2)};
+            
+            newNode0->MBR =newMBR0;
+            printf("NewNode x:%d y:%d \n",newNode0->keys[i]->rect.x1,newNode0->keys[i]->rect.y1);
+            newNode0->numKeys=++i;
+            
         }
         else
-        {
-            newNode1->keys[keyAndGroup[1]] = keys[keyAndGroup[1]];
-        }
+        {  
+           
+            newNode1->keys[j] =  cloneKey(keys[keyAndGroup[1]]);
+            rectangle newMBR1 = {
+                MIN(newNode1->MBR.x1,keys[keyAndGroup[1]]->rect.x1),
+                MAX(newNode1->MBR.x2,keys[keyAndGroup[1]]->rect.x2),
+                MIN(newNode1->MBR.y1,keys[keyAndGroup[1]]->rect.y1),
+                MAX(newNode1->MBR.y2,keys[keyAndGroup[1]]->rect.y2)};
 
+        newNode1->MBR =newMBR1;
+        newNode1->numKeys=++j;
+        
+        }
         // set key in orignal node to null so it's removed in next iteration
         keys[keyAndGroup[1]] = NULL;
         keysLeft--;
+
+    }
+    // printf("\nNode 1 keys:%d\n",newNode0->numKeys);
+   
+
+
+    
+
+
+    //updating the new parents of splitted nodes
+    if(Node->parent==NULL)
+    {   
+        // node * parent = createNode(NULL);
+        newNode0->parent=Node;
+        newNode1->parent =Node;
+        Node->keys[0]->rect=newNode0->MBR;
+        Node->keys[0]->child=newNode0;
+
+        Node->keys[1]->rect=newNode1->MBR;
+        Node->keys[1]->child=newNode1;
+        Node->isLeaf=false;
+        Node->numKeys=2;
+
+        updateMBR(Node);
+
+    }
+    else{
+
+        //to be handeled
+         newNode1->parent =newNode0->parent = Node->parent;
+        // create new key for second splitted node
+        createKey(Node->parent, newNode1->MBR);
+        newNode1->parent = (node *)newNode0->parent->keys[newNode0->parent->numKeys];
+
     }
 
-    // updating the new parents of splitted nodes
-    newNode0->parent = Node->parent;
-    // create new key for second splitted node
-    createKey(Node->parent, newNode1->MBR);
-    newNode1->parent = (node *)newNode0->parent->keys[newNode0->parent->numKeys];
+    // print(newNode0->keys);
+    // printf("\nNode 2 keys:%d\n",newNode1->numKeys);
+    // print(newNode1->keys);
 
-    free(Node->keys);
-    free(keys);
-    free(Node);
+    // free(Node->keys);
+    // free(keys);
+    // free(Node);
 }
 
-// Pick Seeds
-void print(key **keys){
-     for(int i=1;i<M+1;i++){
-        int x1=keys[i]->rect.x1,
-        y1=keys[i]->rect.y1,
-        x2=keys[i]->rect.x2,
-        y2=keys[i]->rect.y2;
-        printf("i%d cord%d %d %d %d ",i,x1,y1,x2,y2);
-    }
-}
-key **pickSeeds(node *node,key ** keys)
+
+int * pickSeeds(node *node,key ** keys)
 {   
-    print(keys);
-    key **seeds = malloc( sizeof(key *)*2 );
-    seeds[0] = (key *)malloc(sizeof(key));
-    seeds[1] = (key *)malloc(sizeof(key));
+   
+    int *seeds = malloc( sizeof(int)*2 );
 
     int wasteAreaMax = 0;
 
@@ -175,11 +259,12 @@ key **pickSeeds(node *node,key ** keys)
             if (abs(wasteArea) > wasteAreaMax)
             {
                 wasteAreaMax = abs(wasteArea);
-                seeds[0] = keys[i];
-                seeds[1] = node->keys[j];
+                seeds[0] = i;
+                seeds[1] = j;
             }
         }
     }
+
     return seeds;
 }
 
@@ -188,34 +273,33 @@ int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys)
 {
     int wasteAreaMax = 0;
     int *returnArray = (int *)malloc(sizeof(int) * 2);
-
+    //iterating over all keys
     for (int i = 0; i < M+1; i++)
     {
-        for (int j = i; j < M+1; j++)
-        {
+      
             // if the node is NULL in orign..
-            if (keys[i] == NULL || keys[j] == NULL)
+            if (keys[i] == NULL )
                 continue;
 
-            rectangle max0 = {
+            rectangle newMBR = {
                 MIN(newNode0->MBR.x1, keys[i]->rect.x1),
                 MAX(newNode0->MBR.x2, keys[i]->rect.x2),
                 MIN(newNode0->MBR.y1, keys[i]->rect.y1),
                 MAX(newNode0->MBR.y2, keys[i]->rect.y2)};
 
-            int wasteArea1 = (max0.x2 - max0.x1) * (max0.y2 - max0.y1) -
-                             (newNode0->keys[i]->rect.x2 - newNode0->MBR.x1) * (newNode0->MBR.y2 - newNode0->MBR.y1);
+            int wasteArea1 = (newMBR.x2 - newMBR.x1) * (newMBR.y2 - newMBR.y1) -
+                            (newNode0->MBR.x2 - newNode0->MBR.x1) * (newNode0->MBR.y2 - newNode0->MBR.y1);
 
-            rectangle max1 = {
-                MAX(newNode1->MBR.x1,keys[i]->rect.x1),
+            rectangle newMBR1 = {
+                MIN(newNode1->MBR.x1,keys[i]->rect.x1),
                 MAX(newNode1->MBR.x2,keys[i]->rect.x2),
-                MAX(newNode1->MBR.y1,keys[i]->rect.y1),
+                MIN(newNode1->MBR.y1,keys[i]->rect.y1),
                 MAX(newNode1->MBR.y2,keys[i]->rect.y2)};
 
-            int wasteArea2 = (max1.x2 - max1.x1) * (max1.y2 - max1.y1) -
+            int wasteArea2 = (newMBR1.x2 - newMBR1.x1) * (newMBR1.y2 - newMBR1.y1) -
                              (newNode1->MBR.x2 - newNode1->MBR.x1) * (newNode1->MBR.y2 - newNode1->MBR.y1);
 
-            if (abs(wasteArea2 - wasteArea1) > wasteAreaMax)
+            if (abs(wasteArea2 - wasteArea1) >= wasteAreaMax)
             {
                 wasteAreaMax = abs(wasteArea2 - wasteArea1);
                 if (wasteArea2 - wasteArea1 <= 0)
@@ -229,11 +313,13 @@ int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys)
                 }
                 returnArray[1] = i;
             }
-        }
+        
     }
 
     return returnArray;
 }
+
+
 
 void createKey(node *node, rectangle rect)
 {
@@ -242,7 +328,7 @@ void createKey(node *node, rectangle rect)
         int index = node->numKeys++;
         node->keys[index]->rect = rect;
         node->keys[index]->child = NULL;
-        updateMBR(node, rect);
+        updateMBR(node);
     }
     else
     {
@@ -251,6 +337,7 @@ void createKey(node *node, rectangle rect)
         newkey->rect=rect;
         newkey->child=NULL;
         quadraticSplit(node,newkey);
+        updateMBR(node);
     }
 }
 
@@ -265,24 +352,23 @@ void insertkey(rTree *tree, rectangle rect)
     createKey(Node, rect);
 }
 
-void updateMBR(node *node, rectangle rect)
+void updateMBR(node *node)
 {
     if (node == NULL)
     {
         return;
     }
-    if (node->numKeys == 1)
-    {
-        node->MBR = rect;
+    rectangle newMBR=node->keys[0]->rect;
+
+    for(int i=0;i<node->numKeys;i++){
+        newMBR.x1 = MIN(newMBR.x1, node->keys[i]->rect.x1);
+        newMBR.x2 = MAX(newMBR.x2, node->keys[i]->rect.x2);
+        newMBR.y1 = MIN(newMBR.y1, node->keys[i]->rect.y1);
+        newMBR.y2 = MAX(newMBR.y2, node->keys[i]->rect.y2);
     }
-    else
-    {
-        node->MBR.x1 = MIN(node->MBR.x1, rect.x1);
-        node->MBR.x2 = MAX(node->MBR.x2, rect.x2);
-        node->MBR.y1 = MIN(node->MBR.y1, rect.y1);
-        node->MBR.y2 = MAX(node->MBR.y2, rect.y2);
-    }
-    updateMBR(node->parent, rect);
+    node->MBR=newMBR;
+    
+    updateMBR(node->parent);
 }
 
 int main()
@@ -314,13 +400,13 @@ int main()
     // fscanf(fp, "%d %d\n", &x, &y);
     // printf("%d %d", x, y);
     int k = 0;
-    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 5)
+    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 6)
     {
         rectangle rect = {x, x, y, y};
         insertkey(tree, rect);
         k++;
     };
-    preOrderTraversal(tree->root);
+     preOrderTraversal(tree->root);
 
     return 0;
 }
