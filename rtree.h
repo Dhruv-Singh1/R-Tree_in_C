@@ -42,10 +42,10 @@ void preOrderTraversal(node *root);
 int area(rectangle rect);
 int incresedArea(rectangle parent, rectangle child);
 node *ChooseLeaf(node *root, rectangle child);
-void quadraticSplit(node *Node,key * newkey);
+node * quadraticSplit(node *Node,key * newkey);
 int *pickSeeds(node *node,key ** keys);
 int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys);
 
-void createKey(node *node, rectangle rect);
+node * createKey(node *node, rectangle rect);
 void insertkey(rTree *root, rectangle rect);
 void updateMBR(node *node);

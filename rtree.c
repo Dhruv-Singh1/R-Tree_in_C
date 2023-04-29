@@ -120,7 +120,7 @@ node *ChooseLeaf(node *root, rectangle child)
 }
 
 // Quadratic cost algorithm
-void quadraticSplit(node *Node,key * newkey)
+node * quadraticSplit(node *Node,key * newkey)
 {
     int keysLeft = M+1;
     key **keys = (key **)malloc(sizeof(key *) * keysLeft);
@@ -131,8 +131,8 @@ void quadraticSplit(node *Node,key * newkey)
     // print(keys);
     // printf("\n\n");
     int *seeds = pickSeeds(Node,keys);
-    int c = seeds[0];
-    int d = seeds[1];
+    // int c = seeds[0];
+    // int d = seeds[1];
     node *newNode0 = createNode(Node);
     createKey(newNode0, keys[seeds[0]]->rect);
     node *newNode1 = createNode(Node);
@@ -149,6 +149,8 @@ void quadraticSplit(node *Node,key * newkey)
     keysLeft -= 2;
     int i,j;
     i=j=1;
+
+    int c = 0;
     while (keysLeft > 0)
     { 
         //    if(i== 3|| j==3)
@@ -191,6 +193,9 @@ void quadraticSplit(node *Node,key * newkey)
         // set key in orignal node to null so it's removed in next iteration
         keys[keyAndGroup[1]] = NULL;
         keysLeft--;
+        if (keyAndGroup[1] == 0){
+            c = keyAndGroup[0];
+        }
 
     }
     // printf("\nNode 1 keys:%d\n",newNode0->numKeys);
@@ -231,19 +236,27 @@ void quadraticSplit(node *Node,key * newkey)
         updateMBR(newNode0->parent);
 
         // create new key for second splitted node
-        createKey(newNode0->parent, newNode1->MBR);
-
-        newNode1->parent = (node *)newNode0->parent->keys[newNode0->parent->numKeys];
-
+        node * insertedNode = createKey(newNode0->parent, newNode1->MBR);
+        newNode1->parent = insertedNode;
+        newNode1->parentKey = insertedNode->keys[(insertedNode->numKeys)-1];
+        /// /newNode1->parent = (node *)newNode0->parent->keys[newNode0->parent->numKeys];
+        insertedNode->keys[(insertedNode->numKeys)-1]->child = newNode1;
+        updateMBR(newNode1->parent);
     }
 
+    if (c==0) {
+        return newNode0;
+    } else{
+        return newNode1;
+    }
     // print(newNode0->keys);
-    // printf("\nNode 2 keys:%d\n",newNode1->numKeys);
+    // printf("\nNode id  keys:%d\n",newNode1->numKeys);
     // print(newNode1->keys);
 
     // free(Node->keys);
     // free(keys);
     // free(Node);
+
 }
 
 
@@ -331,14 +344,15 @@ int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys)
 
 
 
-void createKey(node *node, rectangle rect)
+node * createKey(node *Node, rectangle rect)
 {
-    if (node->numKeys < M)
+    if (Node->numKeys < M)
     {
-        int index = node->numKeys++;
-        node->keys[index]->rect = rect;
-        node->keys[index]->child = NULL;
-        updateMBR(node);
+        int index = Node->numKeys++;
+        Node->keys[index]->rect = rect;
+        Node->keys[index]->child = NULL;
+        updateMBR(Node);
+        return Node;
     }
     else
     {
@@ -346,8 +360,9 @@ void createKey(node *node, rectangle rect)
         key * newkey = (key *) malloc(sizeof(key));
         newkey->rect=rect;
         newkey->child=NULL;
-        quadraticSplit(node,newkey);
-        updateMBR(node);
+        node * insertedNode = quadraticSplit(Node,newkey);
+        updateMBR(Node);
+        return insertedNode;
     }
 }
 
