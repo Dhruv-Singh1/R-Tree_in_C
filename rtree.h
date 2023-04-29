@@ -27,6 +27,7 @@ struct node
     int numKeys;
     bool isLeaf;
     node *parent;
+    key *parentKey;
 };
 
 typedef struct

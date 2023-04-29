@@ -39,7 +39,7 @@ node *createNode(node *parent)
     n->numKeys = 0;
     n->keys = (key **)malloc(sizeof(key *) * M);
     n->isLeaf = true;
-
+    n->parentKey = NULL;
     for (int i = 0; i < M; i++)
     {
         n->keys[i] = (key *)malloc(sizeof(key));
@@ -206,11 +206,16 @@ void quadraticSplit(node *Node,key * newkey)
         // node * parent = createNode(NULL);
         newNode0->parent=Node;
         newNode1->parent =Node;
+
         Node->keys[0]->rect=newNode0->MBR;
         Node->keys[0]->child=newNode0;
 
         Node->keys[1]->rect=newNode1->MBR;
         Node->keys[1]->child=newNode1;
+
+        newNode0->parentKey = Node->keys[0];
+        newNode1->parentKey = Node->keys[1];
+        
         Node->isLeaf=false;
         Node->numKeys=2;
 
@@ -220,9 +225,14 @@ void quadraticSplit(node *Node,key * newkey)
     else{
 
         //to be handeled
-         newNode1->parent =newNode0->parent = Node->parent;
+        newNode1->parent =newNode0->parent = Node->parent;
+        newNode0->parentKey = Node->parentKey;
+        newNode0->parentKey->rect = newNode0->MBR;
+        updateMBR(newNode0->parent);
+
         // create new key for second splitted node
-        createKey(Node->parent, newNode1->MBR);
+        createKey(newNode0->parent, newNode1->MBR);
+
         newNode1->parent = (node *)newNode0->parent->keys[newNode0->parent->numKeys];
 
     }
@@ -368,6 +378,10 @@ void updateMBR(node *node)
     }
     node->MBR=newMBR;
     
+    if (node->parentKey != NULL){
+        node->parentKey->rect = newMBR;
+    }
+
     updateMBR(node->parent);
 }
 
@@ -400,7 +414,7 @@ int main()
     // fscanf(fp, "%d %d\n", &x, &y);
     // printf("%d %d", x, y);
     int k = 0;
-    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 6)
+    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 8)
     {
         rectangle rect = {x, x, y, y};
         insertkey(tree, rect);

@@ -34,3 +34,9 @@ Then implement a pre order traveral of the tree you have build which prints the 
 (top right point and bottom left point of the MBR being printed) for each internal node traversed, and prints the 2-D objects stored in them while traversing the leaf nodes. 
 
 Clear distinction is to be made while printing, whether the node you are printing is internal node or external node.
+
+
+
+/////////////////////////////
+
+update parent node key's to null.
