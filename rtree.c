@@ -7,6 +7,7 @@
 #include "rtree.h"
 
 
+
 // macro to handle 2D points
 #define dimInit(...) FUNC(__VA_ARGS__, -1, -1)
 #define FUNC(x1, y1, x2, y2, ...) dimInit(x1, y1, x2, y2)
@@ -57,7 +58,7 @@ rTree *createTree()
 }
 
 int count=0;
-void preOrderTraversal(node *root)
+void preorderTraversal(node *root)
 {
     if (root == NULL)
         return;
@@ -65,7 +66,7 @@ void preOrderTraversal(node *root)
     {   
         // print(root->keys);
         count+=root->numKeys;
-        printf("Leaf Node\n");
+        printf(" Leaf Node\n");
         for (int i = 0; i < root->numKeys; i++)
         {
             
@@ -78,7 +79,7 @@ void preOrderTraversal(node *root)
     for (int i = 0; i < root->numKeys; i++)
     {
 
-        preOrderTraversal(root->keys[i]->child);
+        preorderTraversal(root->keys[i]->child);
     }
     
     if (root->isLeaf == true)
@@ -89,40 +90,32 @@ void preOrderTraversal(node *root)
       }
 }
 
-//complete this
-// void preOrderTraversal(node *root)
-// {
-//     if (root == NULL)
-//         return;
-//     if (root->isLeaf == true)
-//     {   
-//         // print(root->keys);
-//         count+=root->numKeys;
-//         printf("Leaf Node\n");
-//         for (int i = 0; i < root->numKeys; i++)
-//         {
-            
-//             printf("\tBottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n", root->keys[i]->rect.x1, root->keys[i]->rect.y1, root->keys[i]->rect.x2, root->keys[i]->rect.y2);
-//         }
-//     }
 
-//     // print(root->keys);
-//     printf("\nMBR of Internal is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
-//     for (int i = 0; i < root->numKeys; i++)
-//     {
-        
-       
-//         preOrderTraversal(root->keys[i]->child);
-//     }
-    
-//     // if (root->isLeaf == true)
-//     //     printf("\n\tMBR of Leaf Node is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
-//     // else
-//     //   { 
-       
-//     if(root->parent==NULL) printf("Total Leaf Nodes keys :%d\n",count);
-//     //   }
-// }
+void preOrderTraversal(node* curNode, int level) {
+
+    // Prints the MBR of the entire root node (all its children).
+    if(level == 0) {
+        printf("\nMBR of Root Node: [");
+            printf("(%d,%d) - (%d,%d)", curNode->MBR.x1,curNode->MBR.y1,curNode->MBR.x2,curNode->MBR.y2);
+        printf("]");
+    }
+
+    // For each call, prints the DFS depth as well as all children associated with the current node.
+    printf("\n\nDFS Level: %d\nNode children = ", level);
+  
+    for(int i = 0; i < curNode->numKeys; i++) {
+          printf("[");
+           printf("(%d,%d) - (%d,%d)", curNode->keys[i]->rect.x1,curNode->keys[i]->rect.y1,curNode->keys[i]->rect.x2,curNode->keys[i]->rect.y2);
+        printf("]");
+        if(i != curNode->numKeys - 1) printf(", ");
+    }
+
+    // Recursive DFS call to visit children of the current node.
+    for(int i = 0; i < curNode->numKeys; i++) {
+        if(curNode->keys[i]->child != NULL)
+            preOrderTraversal(curNode->keys[i]->child, level + 1);
+    }
+}
 
 
 int area(rectangle rect)
@@ -176,31 +169,28 @@ node * createKey(node *Node, rectangle rect)
         key * newkey = (key *) malloc(sizeof(key));
         newkey->rect=rect;
         newkey->child=NULL;
-        node * insertedNode = quadraticSplit(Node,newkey);
+        splitNodes * insertedNode = quadraticSplit(Node,newkey);
         updateMBR(Node);
-        return insertedNode;
+        //random
+        return insertedNode->splitNode[0];
     }
 }
 
 
 // Quadratic cost algorithm
-node * quadraticSplit(node *Node,key * newkey)
+splitNodes * quadraticSplit(node *Node,key * newkey)
 {
     int keysLeft = M+1;
     key **keys = (key **)malloc(sizeof(key *) * keysLeft);
     keys[0]=newkey;
     for(int i=1;i<keysLeft;i++){
         keys[i]= Node->keys[i-1];
-        // Node->keys[i-1]=NULL;
     }
-    // print(keys);
-    // printf("\n\n");
+
     int *seeds = pickSeeds(Node,keys);
     // int c = seeds[0];
     // int d = seeds[1];
-
-    node *newNode0 = createNode(Node);
-
+    node *newNode0 = createNode(NULL);
     // createKey(newNode0, keys[seeds[0]]->rect);
     newNode0->keys[0] = cloneKey(keys[seeds[0]]);
     node *newNode1 = createNode(Node);
@@ -209,8 +199,7 @@ node * quadraticSplit(node *Node,key * newkey)
     
     if(Node->isLeaf==false) {
         newNode0->isLeaf=newNode1->isLeaf=false;
-        }
-    
+    }
     
     keys[seeds[0]] = NULL;
     keys[seeds[1]] = NULL;
@@ -242,25 +231,20 @@ node * quadraticSplit(node *Node,key * newkey)
                     MAX(newNode0->MBR.x2, keys[keyAndGroup[1]]->rect.x2),
                     MIN(newNode0->MBR.y1, keys[keyAndGroup[1]]->rect.y1),
                     MAX(newNode0->MBR.y2, keys[keyAndGroup[1]]->rect.y2)};
-            
             newNode0->MBR =newMBR0;
           // printf("NewNode x:%d y:%d \n",newNode0->keys[i]->rect.x1,newNode0->keys[i]->rect.y1);
-            newNode0->numKeys=++i;
-            
+            newNode0->numKeys=++i; 
         }
         else
         {  
-           
             newNode1->keys[j] =  cloneKey(keys[keyAndGroup[1]]);
             rectangle newMBR1 = {
                 MIN(newNode1->MBR.x1,keys[keyAndGroup[1]]->rect.x1),
                 MAX(newNode1->MBR.x2,keys[keyAndGroup[1]]->rect.x2),
                 MIN(newNode1->MBR.y1,keys[keyAndGroup[1]]->rect.y1),
                 MAX(newNode1->MBR.y2,keys[keyAndGroup[1]]->rect.y2)};
-
         newNode1->MBR =newMBR1;
-        newNode1->numKeys=++j;
-        
+        newNode1->numKeys=++j;      
         }
         // set key in orignal node to null so it's removed in next iteration
         keys[keyAndGroup[1]] = NULL;
@@ -268,14 +252,11 @@ node * quadraticSplit(node *Node,key * newkey)
         if (keyAndGroup[1] == 0){
             c = keyAndGroup[0];
         }
-
     }
     // printf("\nNode 1 keys:%d\n",newNode0->numKeys);
    
 
     // return split nodes
-    
-
 
     //updating the new parents of splitted nodes
     if(Node->parent==NULL) // if node was root, need to create a new node
@@ -283,29 +264,23 @@ node * quadraticSplit(node *Node,key * newkey)
         // node * parent = createNode(NULL);
         newNode0->parent=Node;
         newNode1->parent =Node;
-
         Node->keys[0]->rect=newNode0->MBR;
         Node->keys[0]->child=newNode0;
-
         Node->keys[1]->rect=newNode1->MBR;
         Node->keys[1]->child=newNode1;
-
         newNode0->parentKey = Node->keys[0];
         newNode1->parentKey = Node->keys[1];
-        
         Node->isLeaf=false;
         Node->numKeys=2;
-
-        Node->keys[2]=NULL;
-        Node->keys[3]=NULL;
+        // Node->keys[2]=NULL;
+        // Node->keys[3]=NULL;
         updateMBR(Node);
 
     }
     else{ // if node was not root, propgate above
 
         //to be handeled
-
-        newNode1->parent =newNode0->parent = Node->parent;
+        newNode0->parent = Node->parent;
         //check ??
         if(newNode0->keys[0]->child!=NULL){
             newNode0->isLeaf=false;
@@ -313,29 +288,45 @@ node * quadraticSplit(node *Node,key * newkey)
         if(newNode1->keys[0]->child!=NULL){
             newNode1->isLeaf=false;
         }
-
         //this part is BT as upper split changes Node underneath node addresses
-
         newNode0->parentKey = Node->parentKey;
+        //updating MBR in parent key
         newNode0->parentKey->rect = newNode0->MBR;
-        //does it mispoint in parent call?
         newNode0->parentKey->child = newNode0;
         newNode0->parent->isLeaf = false;
         updateMBR(newNode0->parent);
 
         // create new key for second splitted node
-        //susss
         key * newkey = (key *) malloc(sizeof(key));
         newkey->rect=newNode1->MBR;
         newkey->child=newNode1;
-        node * insertedNode = insertKeyInNode(newNode0->parent,newkey);
+        splitNodes * insertedNode = insertKeyInNode(Node->parent,newkey);
+        node * newParent1 = insertedNode->splitNode[insertedNode->splitedNo];
         
-
-        newNode1->parent = insertedNode;
-        
-        newNode1->parentKey = insertedNode->keys[(insertedNode->numKeys)-1];
+        if(Node->parent==newParent1){
+            node * nn;
+            if(insertedNode->splitedNo ==0)
+            {
+                nn= insertedNode->splitNode[0]; 
+            }else{
+                nn=insertedNode->splitNode[0] ;
+            }
+            newNode0->parent=NULL;
+            // printf("Not Nulll...: %d \n",nn==NULL);
+            // if(nn!=NULL&&nn->parentKey!=NULL){
+            //      printf("something wrong returned...\n");
+            // newNode0->parent=nn;
+            // newNode0->parentKey =nn->parentKey;
+            // //updating MBR in parent key
+            // newNode0->parentKey->rect = newNode0->MBR;
+            // newNode0->parentKey->child = newNode0;
+            // newNode0->parent->isLeaf = false;
+            // updateMBR(newNode0->parent);
+            // }
+        }
+        newNode1->parent = newParent1;
+        newNode1->parentKey = newParent1->keys[(newParent1->numKeys)-1];
         newNode1->parent->isLeaf = false;
-
        
         /// /newNode1->parent = (node *)newNode0->parent->keys[newNode0->parent->numKeys];
 
@@ -344,15 +335,19 @@ node * quadraticSplit(node *Node,key * newkey)
       
         updateMBR(newNode1->parent);            
     }    
-
-    if (c==0) {
-        return newNode0;
-    } else{
-        return newNode1;
-    }
-    // print(newNode0->keys);
-    // printf("\nNode id  keys:%d\n",newNode1->numKeys);
-    // print(newNode1->keys);
+    splitNodes * nodes=malloc((sizeof(splitNodes)));
+    
+    nodes->splitNode= (node**)malloc(2*(sizeof(node*) ) ); 
+    nodes->splitedNo=c;
+    nodes->splitNode[0]=newNode0;
+    nodes->splitNode[1]=newNode1;
+    return nodes;
+ 
+    // if (c==0) {
+    //     return newNode0;
+    // } else{
+    //     return newNode1;
+    // }
 
     // free(Node->keys);
     // free(keys);
@@ -363,11 +358,8 @@ node * quadraticSplit(node *Node,key * newkey)
 
 int * pickSeeds(node *node,key ** keys)
 {   
-   
     int *seeds = malloc( sizeof(int)*2 );
-
     int wasteAreaMax = 0;
-
     for (int i = 0; i < M+1; i++)
     {
         for (int j = 0; j < M+1; j++)
@@ -377,7 +369,6 @@ int * pickSeeds(node *node,key ** keys)
                 MAX(keys[i]->rect.x2, keys[j]->rect.x2),
                 MIN(keys[i]->rect.y1, keys[j]->rect.y1),
                 MAX(keys[i]->rect.y2, keys[j]->rect.y2)};
-
             int wasteArea = abs(abs((max.x2 - max.x1) * (max.y2 - max.y1)) -
                             abs((keys[i]->rect.x2 - keys[i]->rect.x1) * (keys[i]->rect.y2 - keys[i]->rect.y1)));
             if (abs(wasteArea) > wasteAreaMax)
@@ -388,7 +379,6 @@ int * pickSeeds(node *node,key ** keys)
             }
         }
     }
-
     return seeds;
 }
 
@@ -445,7 +435,7 @@ int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys)
 
 
 
-node * insertKeyInNode(node *Node, key * key)
+splitNodes * insertKeyInNode(node *Node, key * key)
 {
     if (Node->numKeys < M)
     {
@@ -453,15 +443,15 @@ node * insertKeyInNode(node *Node, key * key)
         Node->keys[index] = key;
         // Node->keys[index]->child = NULL;
         updateMBR(Node);
-        return Node;
+    splitNodes * nodes=malloc(sizeof(splitNodes));
+    nodes->splitedNo=0;
+    nodes->splitNode= malloc((2*sizeof(node*))); 
+    nodes->splitNode[0]=Node;
+    return nodes;
     }
     else
     {
-        // Node split
-        // key * newkey = (key *) malloc(sizeof(key));
-        // newkey->rect=rect;
-        // newkey->child=NULL;
-        node * insertedNode = quadraticSplit(Node, key);
+        splitNodes * insertedNode = quadraticSplit(Node, key);
         updateMBR(Node);
         return insertedNode;
     }
@@ -508,25 +498,9 @@ void updateMBR(node *node)
 
 int main()
 {
-    // rTree *tree = (rTree *)malloc(sizeof(rTree));
-    // tree->root = (node *)malloc(sizeof(node));
-
-    // tree->root->isLeaf = true;
-    // tree->root->parent = NULL;
-    // tree->root->numKeys = 0;
-    // tree->root->MBR.x1 = 0;
-    // tree->root->MBR.y1 = 0;
-    // tree->root->MBR.x2 = 0;
-    // tree->root->MBR.y2 = 2;
-    // tree->root->keys = (key **)malloc(sizeof(key *) * M);
-    // for (int i = 0; i < M; i++)
-    // {
-    //     tree->root->keys[i] = (key *)malloc(sizeof(key));
-    // }
-
     rTree *tree = createTree();
     FILE *fp;
-    fp = fopen("data.txt", "r");
+    fp = fopen("data2.txt", "r");
     if (fp == NULL)
     {
         printf("Error occured while reading the file");
@@ -536,17 +510,15 @@ int main()
     // printf("%d %d", x, y);
     int k = 0;
     //105000
-    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 17)
-    {//17 ke upar repetition 
+    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 105000)
+    {//17 ke upar repetition
         rectangle rect = {x, x, y, y};
         insertkey(tree, rect);
+        // printf("i:%d x%d y%d \n",k+1,x,y);
         k++;
     };
     printf("\n\n Starting New Traverssal..\n");
-    preOrderTraversal(tree->root);
-
+    // preOrderTraversal(tree->root,0);
+    preorderTraversal(tree->root);
     return 0;
 }
-
-
-//ye kaha ka preOrder hai BC... tf
