@@ -46,6 +46,6 @@ node * quadraticSplit(node *Node,key * newkey);
 int *pickSeeds(node *node,key ** keys);
 int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys);
 
-node * createKey(node *node, rectangle rect);
+node * insertKeyInNode(node *node, key * key);
 void insertkey(rTree *root, rectangle rect);
 void updateMBR(node *node);

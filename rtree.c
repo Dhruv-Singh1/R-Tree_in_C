@@ -56,6 +56,7 @@ rTree *createTree()
     return rtree;
 }
 
+int count=0;
 void preOrderTraversal(node *root)
 {
     if (root == NULL)
@@ -63,11 +64,12 @@ void preOrderTraversal(node *root)
     if (root->isLeaf == true)
     {   
         // print(root->keys);
-        printf("External (Leaf Node)\n");
+        count+=root->numKeys;
+        printf("Leaf Node\n");
         for (int i = 0; i < root->numKeys; i++)
         {
             
-            printf(" Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n", root->keys[i]->rect.x1, root->keys[i]->rect.y1, root->keys[i]->rect.x2, root->keys[i]->rect.y2);
+            printf("\tBottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n", root->keys[i]->rect.x1, root->keys[i]->rect.y1, root->keys[i]->rect.x2, root->keys[i]->rect.y2);
         }
     }
 
@@ -78,11 +80,50 @@ void preOrderTraversal(node *root)
 
         preOrderTraversal(root->keys[i]->child);
     }
+    
     if (root->isLeaf == true)
-        printf("\nMBR of External (Leaf Node) is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
+        printf("\n\tMBR of Leaf Node is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
     else
-        printf("\nMBR of Internal (Non Leaf Node) is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
+      {  printf("\nMBR of Internal is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
+       if(root->parent==NULL) printf("Total Leaf Nodes keys :%d\n",count);
+      }
 }
+
+//complete this
+// void preOrderTraversal(node *root)
+// {
+//     if (root == NULL)
+//         return;
+//     if (root->isLeaf == true)
+//     {   
+//         // print(root->keys);
+//         count+=root->numKeys;
+//         printf("Leaf Node\n");
+//         for (int i = 0; i < root->numKeys; i++)
+//         {
+            
+//             printf("\tBottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n", root->keys[i]->rect.x1, root->keys[i]->rect.y1, root->keys[i]->rect.x2, root->keys[i]->rect.y2);
+//         }
+//     }
+
+//     // print(root->keys);
+//     printf("\nMBR of Internal is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
+//     for (int i = 0; i < root->numKeys; i++)
+//     {
+        
+       
+//         preOrderTraversal(root->keys[i]->child);
+//     }
+    
+//     // if (root->isLeaf == true)
+//     //     printf("\n\tMBR of Leaf Node is Bottom Left Point x:%d y:%d Top Right Point x:%d y:%d\n\n", root->MBR.x1, root->MBR.y1, root->MBR.x2, root->MBR.y2);
+//     // else
+//     //   { 
+       
+//     if(root->parent==NULL) printf("Total Leaf Nodes keys :%d\n",count);
+//     //   }
+// }
+
 
 int area(rectangle rect)
 {
@@ -119,6 +160,29 @@ node *ChooseLeaf(node *root, rectangle child)
     return ChooseLeaf(best_leaf, child);
 }
 
+node * createKey(node *Node, rectangle rect)
+{
+    if (Node->numKeys < M)
+    {
+        int index = Node->numKeys++;
+        Node->keys[index]->rect = rect;
+        Node->keys[index]->child = NULL;
+        updateMBR(Node);
+        return Node;
+    }
+    else
+    {
+        // Node split
+        key * newkey = (key *) malloc(sizeof(key));
+        newkey->rect=rect;
+        newkey->child=NULL;
+        node * insertedNode = quadraticSplit(Node,newkey);
+        updateMBR(Node);
+        return insertedNode;
+    }
+}
+
+
 // Quadratic cost algorithm
 node * quadraticSplit(node *Node,key * newkey)
 {
@@ -127,22 +191,32 @@ node * quadraticSplit(node *Node,key * newkey)
     keys[0]=newkey;
     for(int i=1;i<keysLeft;i++){
         keys[i]= Node->keys[i-1];
+        // Node->keys[i-1]=NULL;
     }
     // print(keys);
     // printf("\n\n");
     int *seeds = pickSeeds(Node,keys);
     // int c = seeds[0];
     // int d = seeds[1];
-    node *newNode0 = createNode(Node);
-    createKey(newNode0, keys[seeds[0]]->rect);
-    node *newNode1 = createNode(Node);
-    createKey(newNode1, keys[seeds[1]]->rect);
 
+    node *newNode0 = createNode(Node);
+
+    // createKey(newNode0, keys[seeds[0]]->rect);
+    newNode0->keys[0] = cloneKey(keys[seeds[0]]);
+    node *newNode1 = createNode(Node);
+    // createKey(newNode1, keys[seeds[1]]->rect);
+    newNode1->keys[0] = cloneKey(keys[seeds[1]]);
+    
+    if(Node->isLeaf==false) {
+        newNode0->isLeaf=newNode1->isLeaf=false;
+        }
+    
+    
     keys[seeds[0]] = NULL;
     keys[seeds[1]] = NULL;
 
-    // newNode0->keys[0] = seeds[0];
-    // newNode1->keys[0] = seeds[1];
+
+    //update MBR
     newNode0->MBR =newNode0->keys[0]->rect;
     newNode1->MBR =newNode1->keys[0]->rect;
     
@@ -153,15 +227,13 @@ node * quadraticSplit(node *Node,key * newkey)
     int c = 0;
     while (keysLeft > 0)
     { 
-        //    if(i== 3|| j==3)
-    //     {
-    //         printf("overflow ");
-    //     }
+
 
         int *keyAndGroup = pickNext(Node, newNode0, newNode1, keys);
         int a = keyAndGroup[0];
         int b = keyAndGroup[1];
-        if (keyAndGroup[0] == 0 && keysLeft>(m-newNode1->numKeys) )
+
+        if ( (keyAndGroup[0] == 0 && keysLeft>(m-newNode1->numKeys)) || keysLeft<=(m-newNode0->numKeys) ) 
         {
             newNode0->keys[i] = cloneKey(keys[keyAndGroup[1]]);
             //update MBR of both nodes after each iteration
@@ -172,7 +244,7 @@ node * quadraticSplit(node *Node,key * newkey)
                     MAX(newNode0->MBR.y2, keys[keyAndGroup[1]]->rect.y2)};
             
             newNode0->MBR =newMBR0;
-            printf("NewNode x:%d y:%d \n",newNode0->keys[i]->rect.x1,newNode0->keys[i]->rect.y1);
+          // printf("NewNode x:%d y:%d \n",newNode0->keys[i]->rect.x1,newNode0->keys[i]->rect.y1);
             newNode0->numKeys=++i;
             
         }
@@ -201,12 +273,12 @@ node * quadraticSplit(node *Node,key * newkey)
     // printf("\nNode 1 keys:%d\n",newNode0->numKeys);
    
 
-
+    // return split nodes
     
 
 
     //updating the new parents of splitted nodes
-    if(Node->parent==NULL)
+    if(Node->parent==NULL) // if node was root, need to create a new node
     {   
         // node * parent = createNode(NULL);
         newNode0->parent=Node;
@@ -224,25 +296,54 @@ node * quadraticSplit(node *Node,key * newkey)
         Node->isLeaf=false;
         Node->numKeys=2;
 
+        Node->keys[2]=NULL;
+        Node->keys[3]=NULL;
         updateMBR(Node);
 
     }
-    else{
+    else{ // if node was not root, propgate above
 
         //to be handeled
+
         newNode1->parent =newNode0->parent = Node->parent;
+        //check ??
+        if(newNode0->keys[0]->child!=NULL){
+            newNode0->isLeaf=false;
+        }
+        if(newNode1->keys[0]->child!=NULL){
+            newNode1->isLeaf=false;
+        }
+
+        //this part is BT as upper split changes Node underneath node addresses
+
         newNode0->parentKey = Node->parentKey;
         newNode0->parentKey->rect = newNode0->MBR;
+        //does it mispoint in parent call?
+        newNode0->parentKey->child = newNode0;
+        newNode0->parent->isLeaf = false;
         updateMBR(newNode0->parent);
 
         // create new key for second splitted node
-        node * insertedNode = createKey(newNode0->parent, newNode1->MBR);
+        //susss
+        key * newkey = (key *) malloc(sizeof(key));
+        newkey->rect=newNode1->MBR;
+        newkey->child=newNode1;
+        node * insertedNode = insertKeyInNode(newNode0->parent,newkey);
+        
+
         newNode1->parent = insertedNode;
+        
         newNode1->parentKey = insertedNode->keys[(insertedNode->numKeys)-1];
+        newNode1->parent->isLeaf = false;
+
+       
         /// /newNode1->parent = (node *)newNode0->parent->keys[newNode0->parent->numKeys];
-        insertedNode->keys[(insertedNode->numKeys)-1]->child = newNode1;
-        updateMBR(newNode1->parent);
-    }
+
+     //this line not req ? as child of node 1 already set before passing new key in INSERTkeyinnode ?
+        // insertedNode->keys[(insertedNode->numKeys)-1]->child = newNode1;
+      
+        updateMBR(newNode1->parent);            
+    }    
 
     if (c==0) {
         return newNode0;
@@ -344,23 +445,23 @@ int *pickNext(node *Node, node *newNode0, node *newNode1,key ** keys)
 
 
 
-node * createKey(node *Node, rectangle rect)
+node * insertKeyInNode(node *Node, key * key)
 {
     if (Node->numKeys < M)
     {
         int index = Node->numKeys++;
-        Node->keys[index]->rect = rect;
-        Node->keys[index]->child = NULL;
+        Node->keys[index] = key;
+        // Node->keys[index]->child = NULL;
         updateMBR(Node);
         return Node;
     }
     else
     {
         // Node split
-        key * newkey = (key *) malloc(sizeof(key));
-        newkey->rect=rect;
-        newkey->child=NULL;
-        node * insertedNode = quadraticSplit(Node,newkey);
+        // key * newkey = (key *) malloc(sizeof(key));
+        // newkey->rect=rect;
+        // newkey->child=NULL;
+        node * insertedNode = quadraticSplit(Node, key);
         updateMBR(Node);
         return insertedNode;
     }
@@ -374,7 +475,12 @@ void insertkey(rTree *tree, rectangle rect)
     }
 
     node *Node = ChooseLeaf(tree->root, rect);
-    createKey(Node, rect);
+
+    key * newkey = (key *) malloc(sizeof(key));
+    newkey->rect=rect;
+    newkey->child=NULL;
+
+    insertKeyInNode(Node, newkey);
 }
 
 void updateMBR(node *node)
@@ -429,13 +535,18 @@ int main()
     // fscanf(fp, "%d %d\n", &x, &y);
     // printf("%d %d", x, y);
     int k = 0;
-    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 8)
-    {
+    //105000
+    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k < 17)
+    {//17 ke upar repetition 
         rectangle rect = {x, x, y, y};
         insertkey(tree, rect);
         k++;
     };
-     preOrderTraversal(tree->root);
+    printf("\n\n Starting New Traverssal..\n");
+    preOrderTraversal(tree->root);
 
     return 0;
 }
+
+
+//ye kaha ka preOrder hai BC... tf
