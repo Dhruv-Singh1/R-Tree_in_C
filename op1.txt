@@ -1,0 +1,266 @@
+No file name input from command line..
+
+Starting New Traversal..
+Rectangle format [x1,y1,x2,y2] 2D point format [x1,y1]
+
+MBR of Root Node: [245541,472482,856166,821828]
+DFS Level: 0 
+Internal Node with 4 Keys
+[369418,472482,856039,733404] , [245541,559411,856029,821828] , [275514,559538,856166,733531] , [275534,472482,856116,733531]
+
+parent Info parent: 0x0, 
+MBR of Internal Node: [369418,472482,856039,733404]
+DFS Level: 1 
+Internal Node with 2 Keys
+[398708,472482,398882,472756] , [369418,730449,856039,733404]
+
+parent Info parent: 0x12ee08630, 
+MBR of Internal Node: [398708,472482,398882,472756]
+DFS Level: 2 
+Internal Node with 3 Keys
+[398795,472619,398882,472756] , [398708,472482,398795,472619] , [398785,472609,398805,472756]
+
+parent Info parent: 0x12ee0a620, 
+DFS Level: 3 
+External Node with 3 Keys
+[398882,472756] , [398795,472619] , [398882,472619]
+
+parent Info parent: 0x12ee0a080, 
+DFS Level: 3 
+External Node with 3 Keys
+[398708,472482] , [398795,472609] , [398785,472619]
+
+parent Info parent: 0x12ee0a080, 
+DFS Level: 3 
+External Node with 3 Keys
+[398785,472609] , [398795,472756] , [398805,472609]
+
+parent Info parent: 0x12ee0a080, 
+MBR of Internal Node: [369418,730449,856039,733404]
+DFS Level: 2 
+Internal Node with 3 Keys
+[855892,730449,856029,730586] , [369428,730673,856029,733404] , [369418,730596,856039,733394]
+
+parent Info parent: 0x12ee073c0, 
+DFS Level: 3 
+External Node with 4 Keys
+[855942,730586] , [855942,730449] , [856029,730576] , [855892,730499]
+
+parent Info parent: 0x12ee07330, 
+DFS Level: 3 
+External Node with 2 Keys
+[856029,730673] , [369428,733404]
+
+parent Info parent: 0x12ee07330, 
+DFS Level: 3 
+External Node with 2 Keys
+[856039,730596] , [369418,733394]
+
+parent Info parent: 0x12ee07330, 
+MBR of Internal Node: [245541,559411,856029,821828]
+DFS Level: 1 
+Internal Node with 4 Keys
+[275387,559411,856029,730596] , [245591,559411,275524,821828] , [245541,821554,245815,821828] , [245678,559411,275524,821828]
+
+parent Info parent: 0x12ee08630, 
+MBR of Internal Node: [275387,559411,856029,730596]
+DFS Level: 2 
+Internal Node with 2 Keys
+[856019,730576,856029,730596] , [275387,559411,275611,559558]
+
+parent Info parent: 0x12ee085a0, 
+DFS Level: 3 
+External Node with 3 Keys
+[856019,730596] , [856029,730596] , [856019,730576]
+
+parent Info parent: 0x12ee09090, 
+DFS Level: 3 
+External Node with 3 Keys
+[275611,559411] , [275524,559558] , [275387,559461]
+
+parent Info parent: 0x12ee09090, 
+MBR of Internal Node: [245591,559411,275524,821828]
+DFS Level: 2 
+Internal Node with 4 Keys
+[245668,559538,275514,821701] , [245688,559685,275524,821701] , [275437,559411,275514,559685] , [245591,821554,245668,821828]
+
+parent Info parent: 0x12ee085a0, 
+DFS Level: 3 
+External Node with 3 Keys
+[245668,821701] , [275514,559538] , [245668,821681]
+
+parent Info parent: 0x12ee06de0, 
+DFS Level: 3 
+External Node with 4 Keys
+[245688,821701] , [275524,559685] , [245688,821691] , [245765,821691]
+
+parent Info parent: 0x12ee06de0, 
+DFS Level: 3 
+External Node with 3 Keys
+[275437,559411] , [275514,559558] , [275437,559685]
+
+parent Info parent: 0x12ee06de0, 
+DFS Level: 3 
+External Node with 4 Keys
+[245668,821691] , [245591,821554] , [245591,821691] , [245591,821828]
+
+parent Info parent: 0x12ee06de0, 
+MBR of Internal Node: [245541,821554,245815,821828]
+DFS Level: 2 
+Internal Node with 3 Keys
+[245678,821554,245688,821701] , [245678,821778,245815,821828] , [245541,821554,245765,821681]
+
+parent Info parent: 0x12ee085a0, 
+DFS Level: 3 
+External Node with 3 Keys
+[245678,821701] , [245688,821681] , [245678,821554]
+
+parent Info parent: 0x12ee09450, 
+DFS Level: 3 
+External Node with 3 Keys
+[245678,821828] , [245815,821778] , [245678,821778]
+
+parent Info parent: 0x12ee09450, 
+DFS Level: 3 
+External Node with 3 Keys
+[245765,821554] , [245678,821681] , [245541,821604]
+
+parent Info parent: 0x12ee09450, 
+MBR of Internal Node: [245678,559411,275524,821828]
+DFS Level: 2 
+Internal Node with 2 Keys
+[245678,821691,245815,821828] , [275437,559411,275524,559548]
+
+parent Info parent: 0x12ee085a0, 
+DFS Level: 3 
+External Node with 3 Keys
+[245815,821691] , [245678,821691] , [245765,821828]
+
+parent Info parent: 0x12ee09c20, 
+DFS Level: 3 
+External Node with 2 Keys
+[275437,559548] , [275524,559411]
+
+parent Info parent: 0x12ee09c20, 
+MBR of Internal Node: [275514,559538,856166,733531]
+DFS Level: 1 
+Internal Node with 2 Keys
+[369281,730723,856029,733531] , [275514,559538,856166,730673]
+
+parent Info parent: 0x12ee08630, 
+MBR of Internal Node: [369281,730723,856029,733531]
+DFS Level: 2 
+Internal Node with 4 Keys
+[369418,733257,369418,733531] , [369408,730723,856029,733394] , [369331,733394,369555,733481] , [369281,733257,369428,733531]
+
+parent Info parent: 0x12ee094f0, 
+DFS Level: 3 
+External Node with 4 Keys
+[369418,733531] , [369418,733384] , [369418,733257] , [369418,733481]
+
+parent Info parent: 0x12ee079c0, 
+DFS Level: 3 
+External Node with 4 Keys
+[856029,730723] , [369408,733394] , [369505,733394] , [369505,733257]
+
+parent Info parent: 0x12ee079c0, 
+DFS Level: 3 
+External Node with 3 Keys
+[369555,733481] , [369331,733394] , [369555,733394]
+
+parent Info parent: 0x12ee079c0, 
+DFS Level: 3 
+External Node with 4 Keys
+[369331,733257] , [369428,733394] , [369331,733531] , [369281,733307]
+
+parent Info parent: 0x12ee079c0, 
+MBR of Internal Node: [275514,559538,856166,730673]
+DFS Level: 2 
+Internal Node with 3 Keys
+[275514,559548,856019,730586] , [856039,730576,856166,730673] , [275524,559538,275534,559548]
+
+parent Info parent: 0x12ee094f0, 
+DFS Level: 3 
+External Node with 3 Keys
+[856019,730586] , [275514,559548] , [275524,559635]
+
+parent Info parent: 0x12ee08960, 
+DFS Level: 3 
+External Node with 4 Keys
+[856039,730576] , [856116,730586] , [856166,730673] , [856166,730586]
+
+parent Info parent: 0x12ee08960, 
+DFS Level: 3 
+External Node with 3 Keys
+[275534,559538] , [275524,559548] , [275524,559538]
+
+parent Info parent: 0x12ee08960, 
+MBR of Internal Node: [275534,472482,856116,733531]
+DFS Level: 1 
+Internal Node with 3 Keys
+[398708,472482,398882,472756] , [369408,730586,856029,733531] , [275534,472619,856116,730723]
+
+parent Info parent: 0x12ee08630, 
+MBR of Internal Node: [398708,472482,398882,472756]
+DFS Level: 2 
+Internal Node with 3 Keys
+[398795,472619,398882,472756] , [398708,472482,398795,472619] , [398785,472609,398805,472756]
+
+parent Info parent: 0x12ee0a620, 
+DFS Level: 3 
+External Node with 3 Keys
+[398882,472756] , [398795,472619] , [398882,472619]
+
+parent Info parent: 0x12ee0a080, 
+DFS Level: 3 
+External Node with 3 Keys
+[398708,472482] , [398795,472609] , [398785,472619]
+
+parent Info parent: 0x12ee0a080, 
+DFS Level: 3 
+External Node with 3 Keys
+[398785,472609] , [398795,472756] , [398805,472609]
+
+parent Info parent: 0x12ee0a080, 
+MBR of Internal Node: [369408,730586,856029,733531]
+DFS Level: 2 
+Internal Node with 3 Keys
+[855942,730586,856029,730723] , [369428,733384,369505,733531] , [369408,733384,369418,733404]
+
+parent Info parent: 0x12ee0a620, 
+DFS Level: 3 
+External Node with 2 Keys
+[855942,730723] , [856029,730586]
+
+parent Info parent: 0x12ee07e70, 
+DFS Level: 3 
+External Node with 2 Keys
+[369505,733531] , [369428,733384]
+
+parent Info parent: 0x12ee07e70, 
+DFS Level: 3 
+External Node with 3 Keys
+[369418,733404] , [369408,733384] , [369408,733404]
+
+parent Info parent: 0x12ee07e70, 
+MBR of Internal Node: [275534,472619,856116,730723]
+DFS Level: 2 
+Internal Node with 3 Keys
+[275534,472629,398805,559558] , [856039,730449,856116,730723] , [275611,472619,398805,559685]
+
+parent Info parent: 0x12ee0a620, 
+DFS Level: 3 
+External Node with 4 Keys
+[275611,559548] , [398805,472629] , [275534,559558] , [398795,472629]
+
+parent Info parent: 0x12ee08500, 
+DFS Level: 3 
+External Node with 3 Keys
+[856116,730723] , [856039,730586] , [856116,730449]
+
+parent Info parent: 0x12ee08500, 
+DFS Level: 3 
+External Node with 2 Keys
+[275611,559685] , [398805,472619]
+
+parent Info parent: 0x12ee08500, xNm : 101

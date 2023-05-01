@@ -39,7 +39,7 @@ void updateMBR(node * Node){
     
     rectangle newMBR=Node->keys[0]->MBR;
 
-    for(int i=0;i<Node->numKeys;i++){
+    for(int i=1;i<Node->numKeys;i++){
         newMBR.x1 = MIN(newMBR.x1, Node->keys[i]->MBR.x1);
         newMBR.x2 = MAX(newMBR.x2, Node->keys[i]->MBR.x2);
         newMBR.y1 = MIN(newMBR.y1, Node->keys[i]->MBR.y1);
@@ -87,12 +87,15 @@ void preOrderTraversal(node* curNode, int level) {
         printf("\nMBR of Root Node: [%lld,%lld,%lld,%lld]", curNode->MBR.x1,curNode->MBR.y1,curNode->MBR.x2,curNode->MBR.y2);
     // }
     // For each call, prints the DFS depth as well as all children associated with the current node.
+        if (level ==3){
     printf("\n\nDFS Level: %d\nNode children = ", level);
     for(int i = 0; i < curNode->numKeys; i++) {
+
            printf("[%lld,%lld,%lld,%lld]", curNode->keys[i]->MBR.x1,curNode->keys[i]->MBR.y1,curNode->keys[i]->MBR.x2,curNode->keys[i]->MBR.y2);
 
         if(i != curNode->numKeys - 1) printf(", ");
     }
+        }
     if(isLeaf(curNode)){
         num+=curNode->numKeys;
     }
@@ -134,7 +137,6 @@ void  AdjustTree(node * L, node * LL, rTree * tree){
             parent->keys[parent->numKeys++]=LL;
             LL->parent=parent;
             updateMBR(parent);
-
         }
         else{
             node **splitnodes=quadraticSplit(parent,LL);
@@ -144,10 +146,10 @@ void  AdjustTree(node * L, node * LL, rTree * tree){
                newroot->keys[1]=splitnodes[1];
                newroot->numKeys=2;
                tree->root=newroot;
-              splitnodes[0]->parent=newroot;
-              splitnodes[1]->parent=newroot;
-              updateMBR(newroot);
-              return;
+               splitnodes[0]->parent=newroot;
+               splitnodes[1]->parent=newroot;
+               updateMBR(newroot);
+               return;
             }
             AdjustTree(splitnodes[0],splitnodes[1],tree);
             updateMBR(parent);
@@ -191,6 +193,8 @@ void insertKey(rTree *tree,rectangle rect){
             splitnodes[1]->parent=newroot;
             updateMBR(newroot);
         }
+        updateMBR(splitnodes[0]);
+        updateMBR(splitnodes[1]);
     }
 }
 
@@ -324,6 +328,7 @@ int* pickNext(node *newNode0, node *newNode1 ,node *keys[])
 
 int main(int  argc, char ** argv)
 {
+    //take command line input
     rTree *tree = createTree();
     FILE *fp;
     fp = fopen("data2.txt", "r");
@@ -333,17 +338,16 @@ int main(int  argc, char ** argv)
     int x, y;
     int k = 1;
     //105000
-    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k<=61 )
+    while (fscanf(fp, "%d %d\n", &x, &y) == 2 && k<=98 )
     {
         rectangle rect = {x, x, y, y};
         insertKey(tree,rect);
-        // printf("i:%d x%d y%d \n",k+1,x,y);
         k++;
     };
-    printf("\n\n Starting New Traverssal..\n");
+    printf("\n\nStarting New Traverssal..\n");
     
 
     preOrderTraversal(tree->root,0);
-    printf("\n num : %lld", num);
+    printf("\nNum : %lld", num);
     return 0;
 }
