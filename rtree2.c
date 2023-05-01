@@ -203,9 +203,13 @@ int * pickSeeds(node *keys[]){
     int wasteAreaMax = 0;
     for (int i = 0; i < M+1; i++) {
         for (int j = 0; j < M+1; j++) {
+            if ( i ==j){
+                continue;
+            }
             rectangle max = calculateMBR(keys[i]->MBR,keys[j]->MBR);
             long long wasteArea = llabs((max.x2 - max.x1) * (max.y2 - max.y1)) -
-                            llabs((keys[i]->MBR.x2 - keys[i]->MBR.x1) * (keys[i]->MBR.y2 - keys[i]->MBR.y1));
+                            llabs((keys[i]->MBR.x2 - keys[i]->MBR.x1) * (keys[i]->MBR.y2 - keys[i]->MBR.y1)) -
+                            llabs((keys[j]->MBR.x2 - keys[j]->MBR.x1) * (keys[j]->MBR.y2 - keys[j]->MBR.y1));
 
             if (llabs(wasteArea) > wasteAreaMax)
             {   wasteAreaMax = llabs(wasteArea);
@@ -331,7 +335,7 @@ int main(int  argc, char ** argv)
     //take command line input
     rTree *tree = createTree();
     FILE *fp;
-    fp = fopen("data2.txt", "r");
+    fp = fopen("data.txt", "r");
     if (fp == NULL){ 
         printf("Error occured while reading the file");
     }
