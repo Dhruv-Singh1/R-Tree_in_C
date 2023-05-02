@@ -8,6 +8,7 @@
 // Create Tree
 rTree *createTree() {
     rTree *rtree = (rTree *)malloc(sizeof(rTree));
+    rtree->root = NULL;
     return rtree;
 }
 
