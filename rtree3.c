@@ -184,7 +184,7 @@ void  AdjustTree(node * L, node * LL, rTree * tree){
     return;
     node *parent =L->parent;
     updateMBR(parent);
-    if(tree->root==L){
+   if(parent==NULL){
         node *newroot=createNode();
         newroot->keys[0]=L;
         newroot->keys[1]=LL;
@@ -193,9 +193,6 @@ void  AdjustTree(node * L, node * LL, rTree * tree){
         L->parent=newroot;
         LL->parent=newroot;
         updateMBR(newroot);
-    }
-    else if(parent==NULL){
-        return;
     }
     else if(parent->numKeys<M)
     {  
