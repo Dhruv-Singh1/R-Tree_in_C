@@ -3,7 +3,47 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <stdbool.h>
-#include "rtree2.h"
+
+#define M 4
+#define m 2
+#define MIN(a, b) ((a) <= (b) ? (a) : (b))
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
+// #define int long long int
+typedef struct node node;
+
+typedef struct {
+    long long int x1;
+    long long  int x2;
+    long long int y1;
+    long long int y2;
+} rectangle;
+
+
+
+struct node {
+    rectangle MBR;
+    node *keys[M];
+    int numKeys;
+    node *parent;
+};
+
+typedef struct {
+    node *root;
+} rTree;
+
+
+node * createNode();
+rTree *createTree();
+bool isLeaf(node * Node);
+void preOrderTraversal(node* curNode, int level);
+long long int area(rectangle rect);
+long long int increasedArea(rectangle parent, rectangle child);
+node *ChooseLeaf(node *root, rectangle child);
+node** quadraticSplit(node *Node,node * newkey);
+int * pickSeeds(node *keys[]);
+int* pickNext(node *newNode0, node *newNode1 ,node *keys[]);
+void insertKey(rTree *root, rectangle rect);
+void updateMBR(node *node);
 
 // Create Tree
 rTree *createTree() {
@@ -76,7 +116,6 @@ long long int increasedArea(rectangle parent, rectangle child)
 long long num = 0;
 void preOrderTraversal(node* curNode, int level) {
     // Prints the MBR of the entire root node (all its children).
-    // ||curNode->numKeys==0
     if(curNode==NULL||curNode->numKeys==0){
         return;
     }
@@ -90,24 +129,22 @@ void preOrderTraversal(node* curNode, int level) {
     // For each call, prints the DFS depth as well as all children associated with the current node.
     if(isLeaf(curNode)){
         num+=curNode->numKeys;
-        printf("\nDFS Level: %d External Node with %d Keys\n", level, curNode->numKeys);
+        printf("\nDFS Level: %d \tExternal Node with %d Keys\n", level, curNode->numKeys);
     }
     else{
-        printf("\nDFS Level: %d Internal Node with %d Keys\n", level, curNode->numKeys);
+        printf("\nDFS Level: %d \tInternal Node with %d Keys\n", level, curNode->numKeys);
     }
     for(int i = 0; i < curNode->numKeys; i++) {
         if( curNode->keys[i]->MBR.x1== curNode->keys[i]->MBR.x2&& curNode->keys[i]->MBR.y1== curNode->keys[i]->MBR.y2)
-            {   //if(i==0)printf("MBR of External Node: [%lld,%lld,%lld,%lld]\n", curNode->MBR.x1,curNode->MBR.y1,curNode->MBR.x2,curNode->MBR.y2);
+            {   
                 printf("[%lld,%lld]", curNode->keys[i]->MBR.x1,curNode->keys[i]->MBR.y1);
             }
-        else 
-            
-            printf("[%lld,%lld,%lld,%lld]", curNode->keys[i]->MBR.x1,curNode->keys[i]->MBR.y1,curNode->keys[i]->MBR.x2,curNode->keys[i]->MBR.y2);
-            
+        else            
+            printf("[%lld,%lld,%lld,%lld]", curNode->keys[i]->MBR.x1,curNode->keys[i]->MBR.y1,curNode->keys[i]->MBR.x2,curNode->keys[i]->MBR.y2);     
         if(i != curNode->numKeys - 1) printf(" , ");
     } 
 
-    printf("parent Info parent: %p, ", curNode->parent);
+    // printf("parent Info parent: %p, ", curNode->parent);
     printf("\n\n");
 
     // Recursive DFS call to visit children of the current node.
@@ -167,12 +204,6 @@ void  AdjustTree(node * L, node * LL, rTree * tree){
         updateMBR(parent);
     }
     else{
-        // node * newNode = createNode();
-        // newNode->MBR = LL->MBR;
-        // newNode->numKeys = 1;
-        // newNode->keys[0] = LL;
-        // newNode->parent = NULL;
-        // LL->parent = newNode;
         node **splitnodes=quadraticSplit(parent,LL);
         AdjustTree(splitnodes[0],splitnodes[1],tree);         
         updateMBR(splitnodes[0]);
@@ -198,7 +229,6 @@ void insertKey(rTree *tree,rectangle rect){
         leaf->numKeys++;
         newKey->parent=leaf;
         updateMBR(leaf);
-        // AdjustTree(leaf,NULL,tree);
     }
     else
     {
@@ -233,9 +263,6 @@ int * pickSeeds(node *keys[]){
 
 // Quadratic cost algorithm
 node ** quadraticSplit(node *Node,node * newkey) {
-    // if(Node->numKeys+newkey->numKeys>5){
-    //     printf("Wrong call\n");
-    // }
     int keysLeft = M+1;
     node *keys[keysLeft];
     keys[0]=newkey;
@@ -249,12 +276,8 @@ node ** quadraticSplit(node *Node,node * newkey) {
         Node->keys[i] = NULL;
     }
     Node->numKeys = 0;
-    // node *newNode0 = createNode();
-    // newNode0->keys[0] = cloneKey(keys[seeds[0]]);
     Node->keys[0] = keys[seeds[0]];
-//////
     Node->numKeys++;
-    ///////
     node *newNode1 = createNode();
     newNode1->keys[0] = keys[seeds[1]];
     newNode1->numKeys++;
@@ -336,32 +359,6 @@ int* pickNext(node *newNode0, node *newNode1 ,node *keys[])
     }
     return nextKeyGroupAndPosition;
 }
-
-void keysLevel(node* curNode, int level) {
-
-    if(curNode==NULL||curNode->numKeys==0){
-        return;
-    }
-   
-
-    // For each call, prints the DFS depth as well as all children associated with the current node.
-    if(isLeaf(curNode)){
-        num+=curNode->numKeys;
-        printf("\nDFS Level: %d External Node with %d Keys\n", level, curNode->numKeys);
-    }
-    else{
-        printf("\nDFS Level: %d Internal Node with %d Keys\n", level, curNode->numKeys);
-    }
-
-
-
-    // Recursive DFS call to visit children of the current node.
-    for(int i = 0; i < curNode->numKeys; i++) {
-        keysLevel( curNode->keys[i] , level + 1);
-    }
-}
-
-
 
 int main(int  argc, char ** argv)
 {

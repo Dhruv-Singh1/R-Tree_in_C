@@ -35,3 +35,24 @@ void preorderTraversal(node *root)
        //if(root->parent==NULL) //printf("Total Leaf Nodes keys :%d\n",count);
       }
 }
+
+
+void keysLevel(node* curNode, int level) {
+
+    if(curNode==NULL||curNode->numKeys==0){
+        return;
+    }
+    // For each call, prints the DFS depth as well as all children associated with the current node.
+    if(isLeaf(curNode)){
+        num+=curNode->numKeys;
+        printf("\nDFS Level: %d External Node with %d Keys\n", level, curNode->numKeys);
+    }
+    else{
+        printf("\nDFS Level: %d Internal Node with %d Keys\n", level, curNode->numKeys);
+    }
+
+    // Recursive DFS call to visit children of the current node.
+    for(int i = 0; i < curNode->numKeys; i++) {
+        keysLevel( curNode->keys[i] , level + 1);
+    }
+}
