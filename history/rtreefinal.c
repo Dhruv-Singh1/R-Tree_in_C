@@ -4,7 +4,7 @@
 #include <limits.h>
 #include <stdbool.h>
 // Constant definitions
-#include "rtree3.h"
+#include "rtree2.h"
 
 // Create Tree
 rTree *createTree() {

@@ -3,21 +3,19 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <stdbool.h>
-
 #define M 4
 #define m 2
 #define MIN(a, b) ((a) <= (b) ? (a) : (b))
 #define MAX(a, b) ((a) >= (b) ? (a) : (b))
 // #define int long long int
 typedef struct node node;
-
+//struct for storing 
 typedef struct {
     long long int x1;
     long long  int x2;
     long long int y1;
     long long int y2;
 } rectangle;
-
 
 
 struct node {
@@ -375,7 +373,7 @@ int main(int  argc, char ** argv)
     }
     int x, y;
     long long k = 0;
-    //105000
+
     while (fscanf(fp, "%d %d\n", &x, &y) == 2)
     {
         rectangle rect = {x, x, y, y};
@@ -384,10 +382,7 @@ int main(int  argc, char ** argv)
     };
     printf("\nStarting New Traversal..\nRectangle format [x1,y1,x2,y2] 2D point format [x1,y1]\n");
      preOrderTraversal(tree->root,0);
-    // keysLevel(tree->root,0);
     printf("xNm : %lld", num);
-    
-    // printf("\n num : %lld", k);
     return 0;
 }
 
